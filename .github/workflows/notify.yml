@@ -1,0 +1,29 @@
+name: Notify
+
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  notify:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Enviar notificação por e-mail
+        uses: dawidd6/action-send-mail@v3
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.EMAIL }}
+          password: ${{ secrets.EMAIL_PASSWORD }}
+          to: ${{ secrets.EMAIL }}
+          from: ${{ secrets.EMAIL }}
+          subject: "Deploy realizado — Sistema Bancário"
+          body: |
+            Um novo deploy foi realizado com sucesso no repositório Projeto-C14-NP1.
+
+            Branch: ${{ github.ref_name }}
+            Commit: ${{ github.sha }}
+            Autor: ${{ github.actor }}
+            Horário: ${{ github.event.head_commit.timestamp }}
