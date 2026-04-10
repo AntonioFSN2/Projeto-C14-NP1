@@ -36,7 +36,8 @@ public class Main {
             System.out.println("6 - Exibir dados da conta");
             System.out.println("7 - Listar contas");
             System.out.println("8 - Exibir extrato");
-            System.out.println("9 - Sair");
+            System.out.println("9 - Histórico de transferências");
+            System.out.println("10 - Sair");
             System.out.print("Escolha uma opção: ");
 
             int opcao;
@@ -64,14 +65,10 @@ public class Main {
 
                 case 2:
                     System.out.println("\n--- Consulta de Saldo ---");
-                    System.out.print("Número da conta: ");
+                    System.out.print("Número da conta (ex: 1234-56): ");
                     try {
-                        int num = scanner.nextInt();
-                        scanner.nextLine();
+                        String num = scanner.nextLine();
                         System.out.printf("Saldo atual: R$ %.2f%n", service.consultarSaldo(num));
-                    } catch (InputMismatchException e) {
-                        scanner.nextLine();
-                        System.out.println("Número inválido.");
                     } catch (ContaNaoEncontradaException e) {
                         System.out.println("Erro: " + e.getMessage());
                     }
@@ -79,10 +76,9 @@ public class Main {
 
                 case 3:
                     System.out.println("\n--- Depósito ---");
-                    System.out.print("Número da conta: ");
+                    System.out.print("Número da conta (ex: 1234-56): ");
                     try {
-                        int num = scanner.nextInt();
-                        scanner.nextLine();
+                        String num = scanner.nextLine();
                         System.out.print("Valor: R$ ");
                         BigDecimal valor = scanner.nextBigDecimal();
                         scanner.nextLine();
@@ -98,10 +94,9 @@ public class Main {
 
                 case 4:
                     System.out.println("\n--- Saque ---");
-                    System.out.print("Número da conta: ");
+                    System.out.print("Número da conta (ex: 1234-56): ");
                     try {
-                        int num = scanner.nextInt();
-                        scanner.nextLine();
+                        String num = scanner.nextLine();
                         System.out.print("Valor: R$ ");
                         BigDecimal valor = scanner.nextBigDecimal();
                         scanner.nextLine();
@@ -117,12 +112,11 @@ public class Main {
 
                 case 5:
                     System.out.println("\n--- Transferência ---");
-                    System.out.print("Número da conta de origem: ");
+                    System.out.print("Número da conta de origem (ex: 1234-56): ");
                     try {
-                        int origem = scanner.nextInt();
-                        System.out.print("Número da conta de destino: ");
-                        int destino = scanner.nextInt();
-                        scanner.nextLine();
+                        String origem = scanner.nextLine();
+                        System.out.print("Número da conta de destino (ex: 1234-56): ");
+                        String destino = scanner.nextLine();
                         System.out.print("Valor: R$ ");
                         BigDecimal valor = scanner.nextBigDecimal();
                         scanner.nextLine();
@@ -138,14 +132,10 @@ public class Main {
 
                 case 6:
                     System.out.println("\n--- Dados da Conta ---");
-                    System.out.print("Número da conta: ");
+                    System.out.print("Número da conta (ex: 1234-56): ");
                     try {
-                        int num = scanner.nextInt();
-                        scanner.nextLine();
+                        String num = scanner.nextLine();
                         service.exibirDados(num);
-                    } catch (InputMismatchException e) {
-                        scanner.nextLine();
-                        System.out.println("Número inválido.");
                     } catch (ContaNaoEncontradaException e) {
                         System.out.println("Erro: " + e.getMessage());
                     }
@@ -157,20 +147,27 @@ public class Main {
 
                 case 8:
                     System.out.println("\n--- Extrato ---");
-                    System.out.print("Número da conta: ");
+                    System.out.print("Número da conta (ex: 1234-56): ");
                     try {
-                        int num = scanner.nextInt();
-                        scanner.nextLine();
+                        String num = scanner.nextLine();
                         service.exibirExtrato(num);
-                    } catch (InputMismatchException e) {
-                        scanner.nextLine();
-                        System.out.println("Número inválido.");
                     } catch (ContaNaoEncontradaException e) {
                         System.out.println("Erro: " + e.getMessage());
                     }
                     break;
 
                 case 9:
+                    System.out.println("\n--- Histórico de Transferências ---");
+                    System.out.print("Número da conta (ex: 1234-56): ");
+                    try {
+                        String num = scanner.nextLine();
+                        service.exibirHistoricoTransferencias(num);
+                    } catch (ContaNaoEncontradaException e) {
+                        System.out.println("Erro: " + e.getMessage());
+                    }
+                    break;
+
+                case 10:
                     System.out.println("\nEncerrando o sistema...");
                     scanner.close();
                     return;

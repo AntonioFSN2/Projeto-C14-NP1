@@ -6,15 +6,13 @@ import java.util.Collections;
 import java.util.List;
 
 public class ContaBancaria {
-    private static int proximoNumero = 1;
-
-    private final int numero;
+    private final String numero;
     private final String titular;
     private BigDecimal saldo;
     private final List<Transacao> extrato;
 
-    public ContaBancaria(String titular) {
-        this.numero = proximoNumero++;
+    public ContaBancaria(String numero, String titular) {
+        this.numero = numero;
         this.titular = titular;
         this.saldo = BigDecimal.ZERO;
         this.extrato = new ArrayList<>();
@@ -30,22 +28,20 @@ public class ContaBancaria {
         extrato.add(new Transacao("SAQUE", valor, "Saque realizado na conta " + numero));
     }
 
-    public void registrarTransferencia(BigDecimal valor, boolean enviada) {
+    public void registrarTransferencia(BigDecimal valor, boolean enviada, String contaContrapartida) {
         if (enviada) {
             this.saldo = this.saldo.subtract(valor);
-            extrato.add(new Transacao("TRANSFERÊNCIA ENVIADA", valor, "Transferência enviada"));
+            extrato.add(new Transacao("TRANSFERÊNCIA ENVIADA", valor,
+                    "Transferência enviada para a conta " + contaContrapartida));
         } else {
             this.saldo = this.saldo.add(valor);
-            extrato.add(new Transacao("TRANSFERÊNCIA RECEBIDA", valor, "Transferência recebida"));
+            extrato.add(new Transacao("TRANSFERÊNCIA RECEBIDA", valor,
+                    "Transferência recebida da conta " + contaContrapartida));
         }
     }
 
-    public int getNumero() { return numero; }
+    public String getNumero() { return numero; }
     public String getTitular() { return titular; }
     public BigDecimal getSaldo() { return saldo; }
     public List<Transacao> getExtrato() { return Collections.unmodifiableList(extrato); }
-
-    static void resetarContador() {
-        proximoNumero = 1;
-    }
 }
