@@ -7,81 +7,6 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-class ContaServiceTest {
-
-    private ContaService contaService;
-
-    @BeforeEach
-    void setUp() {
-        contaService = new ContaService();
-    }
-
-    @Test
-    void cadastrarCliente_dadosValidos_retornaClienteComContaAssociada() {
-        Cliente cliente = contaService.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
-
-        assertNotNull(cliente);
-        assertEquals("12345678901", cliente.getCpf());
-        assertEquals("João Silva", cliente.getNome());
-        assertNotNull(cliente.getConta());
-        assertEquals("João Silva", cliente.getConta().getTitular());
-        assertTrue(contaService.getClientes().contains(cliente));
-    }
-
-    @Test
-    void buscarClientePorCpf_cpfExistente_retornaClienteCorreto() {
-        contaService.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
-
-        Cliente cliente = contaService.buscarClientePorCpf("12345678901");
-
-        assertNotNull(cliente);
-        assertEquals("12345678901", cliente.getCpf());
-        assertEquals("João Silva", cliente.getNome());
-    }
-
-    @Test
-    void buscarContaPorNumero_numeroExistente_retornaContaCorreta() {
-        Cliente cliente = contaService.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
-        String numeroConta = cliente.getConta().getNumero();
-
-        ContaBancaria conta = contaService.buscarContaPorNumero(numeroConta);
-
-        assertNotNull(conta);
-        assertEquals(numeroConta, conta.getNumero());
-        assertEquals("João Silva", conta.getTitular());
-    }
-
-    @Test
-    void depositar_valorPositivo_aumentaSaldoERegistraHistorico() {
-        Cliente cliente = contaService.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
-        ContaBancaria conta = cliente.getConta();
-        double saldoInicial = conta.getSaldo();
-        int historicoInicial = conta.getHistorico().size();
-
-        boolean resultado = contaService.depositar(conta, 100.0);
-
-        assertTrue(resultado);
-        assertEquals(saldoInicial + 100.0, conta.getSaldo());
-        assertEquals(historicoInicial + 1, conta.getHistorico().size());
-        assertEquals("DEPÓSITO", conta.getHistorico().get(historicoInicial).getTipo());
-    }
-
-    @Test
-    void sacar_valorValido_diminuiSaldoERegistraHistorico() {
-        Cliente cliente = contaService.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
-        ContaBancaria conta = cliente.getConta();
-        contaService.depositar(conta, 200.0);
-        double saldoInicial = conta.getSaldo();
-        int historicoInicial = conta.getHistorico().size();
-
-        boolean resultado = contaService.sacar(conta, 50.0);
-
-        assertTrue(resultado);
-        assertEquals(saldoInicial - 50.0, conta.getSaldo());
-        assertEquals(historicoInicial + 1, conta.getHistorico().size());
-        assertEquals("SAQUE", conta.getHistorico().get(historicoInicial).getTipo());
-    }
-}
 public class ContaServiceTest {
 
     private ContaService service;
@@ -98,6 +23,135 @@ public class ContaServiceTest {
         contaDaniele = c1.getConta();
         contaAuxiliar = c2.getConta();
     }
+
+    // =====================================================================
+    // Fluxo Normal — Cenários 1 a 5 (Antonio Feliciano)
+    // =====================================================================
+
+    @Test
+    void cadastrarCliente_dadosValidos_retornaClienteComContaAssociada() {
+        Cliente cliente = service.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
+
+        assertNotNull(cliente);
+        assertEquals("12345678901", cliente.getCpf());
+        assertEquals("João Silva", cliente.getNome());
+        assertNotNull(cliente.getConta());
+        assertEquals("João Silva", cliente.getConta().getTitular());
+        assertTrue(service.getClientes().contains(cliente));
+    }
+
+    @Test
+    void buscarClientePorCpf_cpfExistente_retornaClienteCorreto() {
+        service.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
+
+        Cliente cliente = service.buscarClientePorCpf("12345678901");
+
+        assertNotNull(cliente);
+        assertEquals("12345678901", cliente.getCpf());
+        assertEquals("João Silva", cliente.getNome());
+    }
+
+    @Test
+    void buscarContaPorNumero_numeroExistente_retornaContaCorreta() {
+        Cliente cliente = service.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
+        String numeroConta = cliente.getConta().getNumero();
+
+        ContaBancaria conta = service.buscarContaPorNumero(numeroConta);
+
+        assertNotNull(conta);
+        assertEquals(numeroConta, conta.getNumero());
+        assertEquals("João Silva", conta.getTitular());
+    }
+
+    @Test
+    void depositar_valorPositivo_aumentaSaldoERegistraHistorico() {
+        Cliente cliente = service.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
+        ContaBancaria conta = cliente.getConta();
+        double saldoInicial = conta.getSaldo();
+        int historicoInicial = conta.getHistorico().size();
+
+        boolean resultado = service.depositar(conta, 100.0);
+
+        assertTrue(resultado);
+        assertEquals(saldoInicial + 100.0, conta.getSaldo());
+        assertEquals(historicoInicial + 1, conta.getHistorico().size());
+        assertEquals("DEPÓSITO", conta.getHistorico().get(historicoInicial).getTipo());
+    }
+
+    @Test
+    void sacar_valorValido_diminuiSaldoERegistraHistorico() {
+        Cliente cliente = service.cadastrarCliente("12345678901", "João Silva", "01/01/1990");
+        ContaBancaria conta = cliente.getConta();
+        service.depositar(conta, 200.0);
+        double saldoInicial = conta.getSaldo();
+        int historicoInicial = conta.getHistorico().size();
+
+        boolean resultado = service.sacar(conta, 50.0);
+
+        assertTrue(resultado);
+        assertEquals(saldoInicial - 50.0, conta.getSaldo());
+        assertEquals(historicoInicial + 1, conta.getHistorico().size());
+        assertEquals("SAQUE", conta.getHistorico().get(historicoInicial).getTipo());
+    }
+
+    // =====================================================================
+    // Fluxo Normal — Cenários 6 a 10 (Daniele Letícia)
+    // =====================================================================
+
+    // Caso 6 — Transferência válida atualiza os dois saldos
+    @Test
+    void transferir_valorValido_atualizaAmbosOsSaldos() {
+        service.depositar(contaDaniele, 200.0);
+
+        boolean resultado = service.transferir(contaDaniele, contaAuxiliar, 50.0);
+
+        assertTrue(resultado);
+        assertEquals(150.0, contaDaniele.getSaldo());
+        assertEquals(50.0, contaAuxiliar.getSaldo());
+    }
+
+    // Caso 7 — consultarSaldo retorna o valor exato após depósito
+    @Test
+    void consultarSaldo_aposDeposito_retornaValorCorreto() {
+        service.depositar(contaDaniele, 350.0);
+
+        double saldo = service.consultarSaldo(contaDaniele);
+
+        assertEquals(350.0, saldo);
+    }
+
+    // Caso 8 — CPF com máscara é aceito e normalizado para só dígitos
+    @Test
+    void cadastrarCliente_cpfFormatado_normalizaECadastra() {
+        Cliente cliente = service.cadastrarCliente("111.222.333-44", "Teste", "01/01/2000");
+
+        assertNotNull(cliente);
+        assertEquals("11122233344", cliente.getCpf());
+    }
+
+    // Caso 9 — Histórico registra todas as operações realizadas
+    @Test
+    void historico_aposMultiplasOperacoes_registraTodasTransacoes() {
+        service.depositar(contaDaniele, 300.0);   // 1 transação em contaDaniele
+        service.sacar(contaDaniele, 100.0);        // 2 transações em contaDaniele
+        service.transferir(contaDaniele, contaAuxiliar, 50.0); // 3 em contaDaniele, 1 em contaAuxiliar
+
+        assertEquals(3, contaDaniele.getHistorico().size());
+        assertEquals(1, contaAuxiliar.getHistorico().size());
+    }
+
+    // Caso 10 — Dois clientes cadastrados recebem números de conta diferentes
+    @Test
+    void duasContas_numerosDistintos() {
+        String numeroDaniele = contaDaniele.getNumero();
+        String numeroAuxiliar = contaAuxiliar.getNumero();
+
+        assertNotEquals(numeroDaniele, numeroAuxiliar);
+    }
+
+    // =====================================================================
+    // Fluxo de Extensão — Cenários 16 a 20 (Matheus Vieira)
+    // =====================================================================
 
     // Caso 16 — Depósito com valor zero ou negativo deve ser rejeitado
     // Garante que apenas valores positivos alteram o saldo da conta
@@ -162,56 +216,5 @@ public class ContaServiceTest {
         Cliente cliente = service.buscarClientePorCpf("99999999998");
 
         assertNull(cliente);
-    }
-
-    // Caso 6 — Transferência válida atualiza os dois saldos
-    @Test
-    void transferir_valorValido_atualizaAmbosOsSaldos() {
-        service.depositar(contaDaniele, 200.0);
-
-        boolean resultado = service.transferir(contaDaniele, contaAuxiliar, 50.0);
-
-        assertTrue(resultado);
-        assertEquals(150.0, contaDaniele.getSaldo());
-        assertEquals(50.0, contaAuxiliar.getSaldo());
-    }
-
-    // Caso 7 — consultarSaldo retorna o valor exato após depósito
-    @Test
-    void consultarSaldo_aposDeposito_retornaValorCorreto() {
-        service.depositar(contaDaniele, 350.0);
-
-        double saldo = service.consultarSaldo(contaDaniele);
-
-        assertEquals(350.0, saldo);
-    }
-
-    // Caso 8 — CPF com máscara é aceito e normalizado para só dígitos
-    @Test
-    void cadastrarCliente_cpfFormatado_normalizaECadastra() {
-        Cliente cliente = service.cadastrarCliente("111.222.333-44", "Teste", "01/01/2000");
-
-        assertNotNull(cliente);
-        assertEquals("11122233344", cliente.getCpf());
-    }
-
-    // Caso 9 — Histórico registra todas as operações realizadas
-    @Test
-    void historico_aposMultiplasOperacoes_registraTodasTransacoes() {
-        service.depositar(contaDaniele, 300.0);   // 1 transação em contaDaniele
-        service.sacar(contaDaniele, 100.0);        // 2 transações em contaDaniele
-        service.transferir(contaDaniele, contaAuxiliar, 50.0); // 3 em contaDaniele, 1 em contaAuxiliar
-
-        assertEquals(3, contaDaniele.getHistorico().size());
-        assertEquals(1, contaAuxiliar.getHistorico().size());
-    }
-
-    // Caso 10 — Dois clientes cadastrados recebem números de conta diferentes
-    @Test
-    void duasContas_numerosDistintos() {
-        String numeroDaniele = contaDaniele.getNumero();
-        String numeroAuxiliar = contaAuxiliar.getNumero();
-
-        assertNotEquals(numeroDaniele, numeroAuxiliar);
     }
 }
