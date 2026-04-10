@@ -1,19 +1,22 @@
 package com.banco.model;
 
-public class ContaBancaria {
-    private static int proximoNumero = 1;
+import java.util.ArrayList;
+import java.util.List;
 
-    private int numero;
+public class ContaBancaria {
+    private String numero;
     private String titular;
     private double saldo;
+    private List<Transacao> historico;
 
-    public ContaBancaria(String titular) {
-        this.numero = proximoNumero++;
+    public ContaBancaria(String numero, String titular) {
+        this.numero = numero;
         this.titular = titular;
         this.saldo = 0.0;
+        this.historico = new ArrayList<>();
     }
 
-    public int getNumero() {
+    public String getNumero() {
         return numero;
     }
 
@@ -27,5 +30,13 @@ public class ContaBancaria {
 
     public void setSaldo(double saldo) {
         this.saldo = saldo;
+    }
+
+    public List<Transacao> getHistorico() {
+        return historico;
+    }
+
+    public void adicionarTransacao(Transacao transacao) {
+        historico.add(transacao);
     }
 }
