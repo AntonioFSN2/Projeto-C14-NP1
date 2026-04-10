@@ -12,7 +12,7 @@ Desenvolver um sistema básico que permita compreender conceitos fundamentais de
 - JUnit
 
 ## Integrantes do Grupo
-Antonio Feliciano da Silveira Neto - 2122
-Daniele Letícia Pereira Sousa -
-Danilo Henrique Maia da Silva -
-Matheus Vieira Honório de Souza -
+- Antonio Feliciano da Silveira Neto - 2122
+- Daniele Letícia Pereira Sousa -
+- Danilo Henrique Maia da Silva -
+- Matheus Vieira Honório de Souza -
