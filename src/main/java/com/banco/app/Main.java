@@ -1,8 +1,13 @@
 package com.banco.app;
 
+import com.banco.exception.ContaNaoEncontradaException;
+import com.banco.exception.SaldoInsuficienteException;
+import com.banco.exception.ValorInvalidoException;
 import com.banco.model.ContaBancaria;
 import com.banco.service.ContaService;
 
+import java.math.BigDecimal;
+import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Main {
@@ -10,11 +15,14 @@ public class Main {
         ContaService service = new ContaService();
         Scanner scanner = new Scanner(System.in);
 
-        ContaBancaria conta1 = service.criarConta("Danilo");
-        ContaBancaria conta2 = service.criarConta("Antonio");
-
-        if (conta1 != null) conta1.setSaldo(500);
-        if (conta2 != null) conta2.setSaldo(200);
+        try {
+            ContaBancaria conta1 = service.criarConta("Danilo");
+            ContaBancaria conta2 = service.criarConta("Antonio");
+            service.depositar(conta1.getNumero(), new BigDecimal("500.00"));
+            service.depositar(conta2.getNumero(), new BigDecimal("200.00"));
+        } catch (ValorInvalidoException | ContaNaoEncontradaException e) {
+            throw new RuntimeException("Erro na inicialização: " + e.getMessage(), e);
+        }
 
         while (true) {
             System.out.println("\n=================================");
@@ -27,118 +35,119 @@ public class Main {
             System.out.println("5 - Transferir");
             System.out.println("6 - Exibir dados da conta");
             System.out.println("7 - Listar contas");
-            System.out.println("8 - Histórico de Transações");
+            System.out.println("8 - Exibir extrato");
             System.out.println("9 - Sair");
             System.out.print("Escolha uma opção: ");
 
-            int opcao = Integer.parseInt(scanner.nextLine());
+            int opcao;
+            try {
+                opcao = scanner.nextInt();
+                scanner.nextLine();
+            } catch (InputMismatchException e) {
+                scanner.nextLine();
+                System.out.println("\nOpção inválida. Digite um número.");
+                continue;
+            }
 
             switch (opcao) {
                 case 1:
                     System.out.println("\n--- Criação de Conta ---");
                     System.out.print("Nome do titular: ");
                     String titular = scanner.nextLine();
-
-                    ContaBancaria novaConta = service.criarConta(titular);
-
-                    if (novaConta != null) {
-                        System.out.println("Conta criada com sucesso.");
-                        System.out.println("Número da conta: " + novaConta.getNumero());
-                    } else {
-                        System.out.println("Erro ao criar conta.");
+                    try {
+                        ContaBancaria nova = service.criarConta(titular);
+                        System.out.println("Conta criada com sucesso. Número: " + nova.getNumero());
+                    } catch (ValorInvalidoException e) {
+                        System.out.println("Erro: " + e.getMessage());
                     }
                     break;
 
                 case 2:
                     System.out.println("\n--- Consulta de Saldo ---");
                     System.out.print("Número da conta: ");
-                    String numeroSaldo = scanner.nextLine();
-
-                    ContaBancaria contaSaldo = service.buscarContaPorNumero(numeroSaldo);
-
-                    if (contaSaldo != null) {
-                        System.out.printf("Saldo: R$ %.2f%n", contaSaldo.getSaldo());
-                    } else {
-                        System.out.println("Conta não encontrada.");
+                    try {
+                        int num = scanner.nextInt();
+                        scanner.nextLine();
+                        System.out.printf("Saldo atual: R$ %.2f%n", service.consultarSaldo(num));
+                    } catch (InputMismatchException e) {
+                        scanner.nextLine();
+                        System.out.println("Número inválido.");
+                    } catch (ContaNaoEncontradaException e) {
+                        System.out.println("Erro: " + e.getMessage());
                     }
                     break;
 
                 case 3:
                     System.out.println("\n--- Depósito ---");
                     System.out.print("Número da conta: ");
-                    String numeroDeposito = scanner.nextLine();
-
-                    ContaBancaria contaDeposito = service.buscarContaPorNumero(numeroDeposito);
-
-                    if (contaDeposito != null) {
-                        System.out.print("Valor: ");
-                        double valorDep = Double.parseDouble(scanner.nextLine());
-
-                        if (service.depositar(contaDeposito, valorDep)) {
-                            System.out.println("Depósito realizado.");
-                        } else {
-                            System.out.println("Valor inválido.");
-                        }
-                    } else {
-                        System.out.println("Conta não encontrada.");
+                    try {
+                        int num = scanner.nextInt();
+                        scanner.nextLine();
+                        System.out.print("Valor: R$ ");
+                        BigDecimal valor = scanner.nextBigDecimal();
+                        scanner.nextLine();
+                        service.depositar(num, valor);
+                        System.out.printf("Depósito realizado. Novo saldo: R$ %.2f%n", service.consultarSaldo(num));
+                    } catch (InputMismatchException e) {
+                        scanner.nextLine();
+                        System.out.println("Valor inválido.");
+                    } catch (ContaNaoEncontradaException | ValorInvalidoException e) {
+                        System.out.println("Erro: " + e.getMessage());
                     }
                     break;
 
                 case 4:
                     System.out.println("\n--- Saque ---");
                     System.out.print("Número da conta: ");
-                    String numeroSaque = scanner.nextLine();
-
-                    ContaBancaria contaSaque = service.buscarContaPorNumero(numeroSaque);
-
-                    if (contaSaque != null) {
-                        System.out.print("Valor: ");
-                        double valorSac = Double.parseDouble(scanner.nextLine());
-
-                        if (service.sacar(contaSaque, valorSac)) {
-                            System.out.println("Saque realizado.");
-                        } else {
-                            System.out.println("Erro: saldo insuficiente ou valor inválido.");
-                        }
-                    } else {
-                        System.out.println("Conta não encontrada.");
+                    try {
+                        int num = scanner.nextInt();
+                        scanner.nextLine();
+                        System.out.print("Valor: R$ ");
+                        BigDecimal valor = scanner.nextBigDecimal();
+                        scanner.nextLine();
+                        service.sacar(num, valor);
+                        System.out.printf("Saque realizado. Novo saldo: R$ %.2f%n", service.consultarSaldo(num));
+                    } catch (InputMismatchException e) {
+                        scanner.nextLine();
+                        System.out.println("Valor inválido.");
+                    } catch (ContaNaoEncontradaException | ValorInvalidoException | SaldoInsuficienteException e) {
+                        System.out.println("Erro: " + e.getMessage());
                     }
                     break;
 
                 case 5:
                     System.out.println("\n--- Transferência ---");
-                    System.out.print("Conta origem: ");
-                    String numeroOrigem = scanner.nextLine();
-
-                    System.out.print("Conta destino: ");
-                    String numeroDestino = scanner.nextLine();
-
-                    System.out.print("Valor: ");
-                    double valor = Double.parseDouble(scanner.nextLine());
-
-                    ContaBancaria origem = service.buscarContaPorNumero(numeroOrigem);
-                    ContaBancaria destino = service.buscarContaPorNumero(numeroDestino);
-
-                    if (origem == null || destino == null) {
-                        System.out.println("Conta inválida.");
-                    } else if (service.transferir(origem, destino, valor)) {
-                        System.out.println("Transferência realizada.");
-                    } else {
-                        System.out.println("Erro na transferência.");
+                    System.out.print("Número da conta de origem: ");
+                    try {
+                        int origem = scanner.nextInt();
+                        System.out.print("Número da conta de destino: ");
+                        int destino = scanner.nextInt();
+                        scanner.nextLine();
+                        System.out.print("Valor: R$ ");
+                        BigDecimal valor = scanner.nextBigDecimal();
+                        scanner.nextLine();
+                        service.transferir(origem, destino, valor);
+                        System.out.println("Transferência realizada com sucesso.");
+                    } catch (InputMismatchException e) {
+                        scanner.nextLine();
+                        System.out.println("Valor inválido.");
+                    } catch (ContaNaoEncontradaException | ValorInvalidoException | SaldoInsuficienteException e) {
+                        System.out.println("Erro: " + e.getMessage());
                     }
                     break;
 
                 case 6:
                     System.out.println("\n--- Dados da Conta ---");
                     System.out.print("Número da conta: ");
-                    String numeroDados = scanner.nextLine();
-
-                    ContaBancaria contaDados = service.buscarContaPorNumero(numeroDados);
-
-                    if (contaDados != null) {
-                        service.exibirDados(contaDados);
-                    } else {
-                        System.out.println("Conta não encontrada.");
+                    try {
+                        int num = scanner.nextInt();
+                        scanner.nextLine();
+                        service.exibirDados(num);
+                    } catch (InputMismatchException e) {
+                        scanner.nextLine();
+                        System.out.println("Número inválido.");
+                    } catch (ContaNaoEncontradaException e) {
+                        System.out.println("Erro: " + e.getMessage());
                     }
                     break;
 
@@ -147,17 +156,22 @@ public class Main {
                     break;
 
                 case 8:
-                    System.out.println("\n--- Histórico ---");
+                    System.out.println("\n--- Extrato ---");
                     System.out.print("Número da conta: ");
-                    String numeroHistorico = scanner.nextLine();
-
-                    ContaBancaria contaHistorico = service.buscarContaPorNumero(numeroHistorico);
-
-                    service.exibirHistorico(contaHistorico);
+                    try {
+                        int num = scanner.nextInt();
+                        scanner.nextLine();
+                        service.exibirExtrato(num);
+                    } catch (InputMismatchException e) {
+                        scanner.nextLine();
+                        System.out.println("Número inválido.");
+                    } catch (ContaNaoEncontradaException e) {
+                        System.out.println("Erro: " + e.getMessage());
+                    }
                     break;
 
                 case 9:
-                    System.out.println("Encerrando...");
+                    System.out.println("\nEncerrando o sistema...");
                     scanner.close();
                     return;
 
