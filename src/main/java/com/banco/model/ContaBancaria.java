@@ -1,17 +1,19 @@
 package com.banco.model;
 
 public class ContaBancaria {
-    private String numero;
+    private static int proximoNumero = 1;
+
+    private int numero;
     private String titular;
     private double saldo;
 
-    public ContaBancaria(String numero, String titular) {
-        this.numero = numero;
+    public ContaBancaria(String titular) {
+        this.numero = proximoNumero++;
         this.titular = titular;
         this.saldo = 0.0;
     }
 
-    public String getNumero() {
+    public int getNumero() {
         return numero;
     }
 
