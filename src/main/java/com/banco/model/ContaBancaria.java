@@ -13,8 +13,8 @@ public class ContaBancaria {
     private BigDecimal saldo;
     private final List<Transacao> extrato;
 
-    public ContaBancaria(String titular) {
-        this.numero = proximoNumero++;
+    public ContaBancaria(String numero, String titular) {
+        this.numero = numero;
         this.titular = titular;
         this.saldo = BigDecimal.ZERO;
         this.extrato = new ArrayList<>();
@@ -45,5 +45,13 @@ public class ContaBancaria {
 
     static void resetarContador() {
         proximoNumero = 1;
+    }
+
+    public List<Transacao> getHistorico() {
+        return historico;
+    }
+
+    public void adicionarTransacao(Transacao transacao) {
+        historico.add(transacao);
     }
 }

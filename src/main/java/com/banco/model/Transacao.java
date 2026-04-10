@@ -1,30 +1,42 @@
 package com.banco.model;
 
-import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 public class Transacao {
+    private String tipo;
+    private double valor;
+    private String descricao;
+    private LocalDateTime dataHora;
 
-    public enum Tipo {
-        DEPOSITO, SAQUE, TRANSFERENCIA_ENVIADA, TRANSFERENCIA_RECEBIDA
-    }
-
-    private final Tipo tipo;
-    private final BigDecimal valor;
-    private final LocalDateTime momento;
-
-    public Transacao(Tipo tipo, BigDecimal valor) {
+    public Transacao(String tipo, double valor, String descricao) {
         this.tipo = tipo;
         this.valor = valor;
-        this.momento = LocalDateTime.now();
+        this.descricao = descricao;
+        this.dataHora = LocalDateTime.now();
     }
 
-    public Tipo getTipo() { return tipo; }
-    public BigDecimal getValor() { return valor; }
-    public LocalDateTime getMomento() { return momento; }
+    public String getTipo() {
+        return tipo;
+    }
+
+    public double getValor() {
+        return valor;
+    }
+
+    public String getDescricao() {
+        return descricao;
+    }
+
+    public LocalDateTime getDataHora() {
+        return dataHora;
+    }
 
     @Override
     public String toString() {
-        return String.format("[%s] %s - R$ %s", momento, tipo.name(), valor.toPlainString());
+        DateTimeFormatter formato = DateTimeFormatter.ofPattern("dd/MM/yyyy HH:mm:ss");
+        return "[" + dataHora.format(formato) + "] "
+                + tipo + " - R$ " + String.format("%.2f", valor)
+                + " | " + descricao;
     }
 }

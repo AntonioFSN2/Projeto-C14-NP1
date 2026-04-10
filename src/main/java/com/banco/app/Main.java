@@ -26,7 +26,7 @@ public class Main {
 
         while (true) {
             System.out.println("\n=================================");
-            System.out.println("      SISTEMA BANCÁRIO");
+            System.out.println("         SISTEMA BANCÁRIO");
             System.out.println("=================================");
             System.out.println("1 - Criar conta");
             System.out.println("2 - Consultar saldo");
@@ -176,7 +176,7 @@ public class Main {
                     return;
 
                 default:
-                    System.out.println("\nOpção inválida. Tente novamente.");
+                    System.out.println("Opção inválida.");
             }
         }
     }
