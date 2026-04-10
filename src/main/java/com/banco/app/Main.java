@@ -219,6 +219,17 @@ public class Main {
                     break;
 
                 case 9:
+                    System.out.println("\n--- Histórico de Transferências ---");
+                    System.out.print("Número da conta (ex: 1234-56): ");
+                    try {
+                        String num = scanner.nextLine();
+                        service.exibirHistoricoTransferencias(num);
+                    } catch (ContaNaoEncontradaException e) {
+                        System.out.println("Erro: " + e.getMessage());
+                    }
+                    break;
+
+                case 10:
                     System.out.println("\nEncerrando o sistema...");
                     scanner.close();
                     return;

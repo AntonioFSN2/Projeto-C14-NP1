@@ -75,13 +75,11 @@ public class ContaService {
     }
 
     private String gerarNumeroUnico() {
-        String numeroGerado;
-
+        String numero;
         do {
-            numeroGerado = gerarNumeroConta();
-        } while (buscarContaPorNumero(numeroGerado) != null);
-
-        return numeroGerado;
+            numero = gerarNumeroConta();
+        } while (buscarContaPorNumeroInterno(numero) != null);
+        return numero;
     }
 
     public Cliente buscarClientePorCpf(String cpf) {
