@@ -1,14 +1,20 @@
-package com.banco.service;
+
+ package com.banco.service;
 
 import com.banco.model.ContaBancaria;
+import com.banco.model.Transacao;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class ContaService {
     private List<ContaBancaria> contas;
+    private Random random;
 
     public ContaService() {
         this.contas = new ArrayList<>();
+        this.random = new Random();
     }
 
     public ContaBancaria criarConta(String titular) {
@@ -16,14 +22,32 @@ public class ContaService {
             return null;
         }
 
-        ContaBancaria conta = new ContaBancaria(titular);
+        String numero = gerarNumeroUnico();
+        ContaBancaria conta = new ContaBancaria(numero, titular);
         contas.add(conta);
         return conta;
     }
 
-    public ContaBancaria buscarContaPorNumero(int numero) {
+    private String gerarNumeroConta() {
+        int parte1 = random.nextInt(10000); // 0000 até 9999
+        int parte2 = random.nextInt(100);   // 00 até 99
+
+        return String.format("%04d-%02d", parte1, parte2);
+    }
+
+    private String gerarNumeroUnico() {
+        String numeroGerado;
+
+        do {
+            numeroGerado = gerarNumeroConta();
+        } while (buscarContaPorNumero(numeroGerado) != null);
+
+        return numeroGerado;
+    }
+
+    public ContaBancaria buscarContaPorNumero(String numero) {
         for (ContaBancaria conta : contas) {
-            if (conta.getNumero() == numero) {
+            if (conta.getNumero().equals(numero)) {
                 return conta;
             }
         }
@@ -38,31 +62,41 @@ public class ContaService {
     }
 
     public boolean depositar(ContaBancaria conta, double valor) {
-        if (conta == null || valor <= 0) {
-            return false;
-        }
-
-        conta.setSaldo(conta.getSaldo() + valor);
-        return true;
+    if (conta == null || valor <= 0) {
+        return false;
     }
+
+    conta.setSaldo(conta.getSaldo() + valor);
+    conta.adicionarTransacao(new Transacao("DEPÓSITO", valor, "Depósito realizado na conta " + conta.getNumero()
+    ));
+    return true;
+    }
+
 
     public boolean sacar(ContaBancaria conta, double valor) {
-        if (conta == null || valor <= 0 || valor > conta.getSaldo()) {
-            return false;
-        }
-
-        conta.setSaldo(conta.getSaldo() - valor);
-        return true;
+    if (conta == null || valor <= 0 || valor > conta.getSaldo()) {
+        return false;
     }
 
-    public boolean transferir(ContaBancaria origem, ContaBancaria destino, double valor) {
-        if (origem == null || destino == null || valor <= 0 || valor > origem.getSaldo()) {
-            return false;
-        }
+    conta.setSaldo(conta.getSaldo() - valor);
+    conta.adicionarTransacao(new Transacao(
+            "SAQUE",
+            valor,
+            "Saque realizado na conta " + conta.getNumero()
+    ));
+    return true;
+    }
 
-        origem.setSaldo(origem.getSaldo() - valor);
-        destino.setSaldo(destino.getSaldo() + valor);
-        return true;
+
+    public boolean transferir(ContaBancaria origem, ContaBancaria destino, double valor) {
+    if (origem == null || destino == null || valor <= 0 || valor > origem.getSaldo()) {
+        return false;
+    }
+    origem.setSaldo(origem.getSaldo() - valor);
+    destino.setSaldo(destino.getSaldo() + valor);
+    origem.adicionarTransacao(new Transacao("TRANSFERÊNCIA ENVIADA",valor,"Transferência enviada para a conta " + destino.getNumero()));
+    destino.adicionarTransacao(new Transacao("TRANSFERÊNCIA RECEBIDA",valor,"Transferência recebida da conta " + origem.getNumero()));
+    return true;
     }
 
     public void exibirDados(ContaBancaria conta) {
@@ -98,4 +132,29 @@ public class ContaService {
     public List<ContaBancaria> getContas() {
         return contas;
     }
+
+    public void exibirHistorico(ContaBancaria conta) {
+    if (conta == null) {
+        System.out.println("Conta não encontrada.");
+        return;
+    }
+
+    System.out.println("\n==============================");
+    System.out.println("   HISTÓRICO DE TRANSAÇÕES");
+    System.out.println("==============================");
+    System.out.println("Conta  : " + conta.getNumero());
+    System.out.println("Titular: " + conta.getTitular());
+    System.out.println("------------------------------");
+
+    if (conta.getHistorico().isEmpty()) {
+        System.out.println("Nenhuma transação registrada.");
+    } else {
+        for (Transacao transacao : conta.getHistorico()) {
+            System.out.println(transacao);
+        }
+    }
+
+    System.out.println("==============================");
 }
+}
+
