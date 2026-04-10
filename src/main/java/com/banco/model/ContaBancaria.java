@@ -13,8 +13,8 @@ public class ContaBancaria {
     private BigDecimal saldo;
     private final List<Transacao> extrato;
 
-    public ContaBancaria(String numero, String titular) {
-        this.numero = numero;
+    public ContaBancaria(String titular) {
+        this.numero = proximoNumero++;
         this.titular = titular;
         this.saldo = BigDecimal.ZERO;
         this.extrato = new ArrayList<>();
@@ -22,20 +22,22 @@ public class ContaBancaria {
 
     public void depositar(BigDecimal valor) {
         this.saldo = this.saldo.add(valor);
-        extrato.add(new Transacao(Transacao.Tipo.DEPOSITO, valor));
+        extrato.add(new Transacao("DEPÓSITO", valor, "Depósito realizado na conta " + numero));
     }
 
     public void sacar(BigDecimal valor) {
         this.saldo = this.saldo.subtract(valor);
-        extrato.add(new Transacao(Transacao.Tipo.SAQUE, valor));
+        extrato.add(new Transacao("SAQUE", valor, "Saque realizado na conta " + numero));
     }
 
     public void registrarTransferencia(BigDecimal valor, boolean enviada) {
-        Transacao.Tipo tipo = enviada
-                ? Transacao.Tipo.TRANSFERENCIA_ENVIADA
-                : Transacao.Tipo.TRANSFERENCIA_RECEBIDA;
-        this.saldo = enviada ? this.saldo.subtract(valor) : this.saldo.add(valor);
-        extrato.add(new Transacao(tipo, valor));
+        if (enviada) {
+            this.saldo = this.saldo.subtract(valor);
+            extrato.add(new Transacao("TRANSFERÊNCIA ENVIADA", valor, "Transferência enviada"));
+        } else {
+            this.saldo = this.saldo.add(valor);
+            extrato.add(new Transacao("TRANSFERÊNCIA RECEBIDA", valor, "Transferência recebida"));
+        }
     }
 
     public int getNumero() { return numero; }
@@ -45,13 +47,5 @@ public class ContaBancaria {
 
     static void resetarContador() {
         proximoNumero = 1;
-    }
-
-    public List<Transacao> getHistorico() {
-        return historico;
-    }
-
-    public void adicionarTransacao(Transacao transacao) {
-        historico.add(transacao);
     }
 }
