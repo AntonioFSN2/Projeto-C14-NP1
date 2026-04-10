@@ -16,7 +16,6 @@ public class Main {
         Cliente cliente2 = service.cadastrarCliente("22222222222", "Danilo", "02/12/1990");
         Cliente cliente3 = service.cadastrarCliente("33333333333", "Matheus", "22/10/1990");
 
-
         if (cliente1 != null) {
             cliente1.getConta().setSaldo(500);
             cliente1.getConta().adicionarTransacao(new Transacao(
@@ -33,7 +32,9 @@ public class Main {
                     200,
                     "Saldo inicial definido para a conta"
             ));
-                if (cliente3 != null) {
+        }
+
+        if (cliente3 != null) {
             cliente3.getConta().setSaldo(600);
             cliente3.getConta().adicionarTransacao(new Transacao(
                     "SALDO INICIAL",
@@ -224,9 +225,7 @@ public class Main {
 
                 default:
                     System.out.println("Opção inválida. Tente novamente.");
-                }
             }
         }
-    scanner.close();
     }
 }

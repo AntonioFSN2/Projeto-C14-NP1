@@ -1,0 +1,18 @@
+# Maven
+target/
+
+# IntelliJ IDEA output
+out/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+
+# macOS
+.DS_Store
+
+# Claude Code
+CLAUDE.md
+.claude/
+prompts.md
+

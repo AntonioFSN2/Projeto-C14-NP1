@@ -36,36 +36,36 @@ public class ContaService {
     }
 
     public Cliente cadastrarCliente(String cpf, String nome, String dataNascimentoStr) {
-    String cpfPadronizado = padronizarCpf(cpf);
+        String cpfPadronizado = padronizarCpf(cpf);
 
-    if (cpfPadronizado == null || nome == null || nome.trim().isEmpty()) {
-        return null;
-    }
+        if (cpfPadronizado == null || nome == null || nome.trim().isEmpty()) {
+            return null;
+        }
 
-    LocalDate dataNascimento;
+        LocalDate dataNascimento;
 
-    try {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        dataNascimento = LocalDate.parse(dataNascimentoStr, formatter);
-    } catch (Exception e) {
-        return null;
-    }
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            dataNascimento = LocalDate.parse(dataNascimentoStr, formatter);
+        } catch (Exception e) {
+            return null;
+        }
 
-    if (dataNascimento.isAfter(LocalDate.now())) {
-    return null;
-    }
+        if (dataNascimento.isAfter(LocalDate.now())) {
+            return null;
+        }
 
-    if (buscarClientePorCpf(cpfPadronizado) != null) {
-        return null;
-    }
+        if (buscarClientePorCpf(cpfPadronizado) != null) {
+            return null;
+        }
 
-    String numeroConta = gerarNumeroUnico();
-    ContaBancaria conta = new ContaBancaria(numeroConta, nome);
+        String numeroConta = gerarNumeroUnico();
+        ContaBancaria conta = new ContaBancaria(numeroConta, nome);
 
-    Cliente cliente = new Cliente(cpfPadronizado, nome, conta, dataNascimento);
-    clientes.add(cliente);
+        Cliente cliente = new Cliente(cpfPadronizado, nome, conta, dataNascimento);
+        clientes.add(cliente);
 
-    return cliente;
+        return cliente;
     }
 
     private String gerarNumeroConta() {
@@ -110,7 +110,7 @@ public class ContaService {
 
     public double consultarSaldo(ContaBancaria conta) {
         if (conta == null) {
-            return -1;
+            return 0;
         }
         return conta.getSaldo();
     }
@@ -195,7 +195,7 @@ public class ContaService {
         for (Cliente cliente : clientes) {
             System.out.println("Nome       : " + cliente.getNome());
             System.out.println("CPF        : " + cliente.getCpfFormatado());
-            System.out.println("Data Nasc.: " + cliente.getDataNascimentoFormatada());
+            System.out.println("Data Nasc. : " + cliente.getDataNascimentoFormatada());
             System.out.println("Conta      : " + cliente.getConta().getNumero());
             System.out.printf("Saldo      : R$ %.2f%n", cliente.getConta().getSaldo());
             System.out.println("------------------------------");
