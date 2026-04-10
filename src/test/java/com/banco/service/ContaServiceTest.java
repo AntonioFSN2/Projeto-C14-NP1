@@ -16,10 +16,6 @@ public class ContaServiceTest {
         service = new ContaService();
     }
 
-    // =====================================================================
-    // Fluxo de Extensão — Cenários 16 a 20 (Matheus Vieira)
-    // =====================================================================
-
     @Test
     void depositar_valorZeroOuNegativo_retornaFalse() {
         Cliente cliente = service.cadastrarCliente("19191919191", "Matheus", "01/01/1990");
