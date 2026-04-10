@@ -1,24 +1,71 @@
 package com.banco.service;
 
-import com.banco.exception.ContaNaoEncontradaException;
-import com.banco.exception.SaldoInsuficienteException;
-import com.banco.exception.ValorInvalidoException;
+import com.banco.model.Cliente;
 import com.banco.model.ContaBancaria;
 import com.banco.model.Transacao;
 
-import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
 public class ContaService {
-    private final List<ContaBancaria> contas;
-    private final Random random;
+    private List<Cliente> clientes;
+    private Random random;
 
     public ContaService() {
-        this.contas = new ArrayList<>();
+        this.clientes = new ArrayList<>();
         this.random = new Random();
+    }
+
+    private String padronizarCpf(String cpf) {
+        if (cpf == null) {
+            return null;
+        }
+
+        String cpfLimpo = cpf.replace(".", "")
+                             .replace("-", "")
+                             .replace(" ", "");
+
+        if (!cpfLimpo.matches("\\d{11}")) {
+            return null;
+        }
+
+        return cpfLimpo;
+    }
+
+    public Cliente cadastrarCliente(String cpf, String nome, String dataNascimentoStr) {
+        String cpfPadronizado = padronizarCpf(cpf);
+
+        if (cpfPadronizado == null || nome == null || nome.trim().isEmpty()) {
+            return null;
+        }
+
+        LocalDate dataNascimento;
+
+        try {
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+            dataNascimento = LocalDate.parse(dataNascimentoStr, formatter);
+        } catch (Exception e) {
+            return null;
+        }
+
+        if (dataNascimento.isAfter(LocalDate.now())) {
+            return null;
+        }
+
+        if (buscarClientePorCpf(cpfPadronizado) != null) {
+            return null;
+        }
+
+        String numeroConta = gerarNumeroUnico();
+        ContaBancaria conta = new ContaBancaria(numeroConta, nome);
+
+        Cliente cliente = new Cliente(cpfPadronizado, nome, conta, dataNascimento);
+        clientes.add(cliente);
+
+        return cliente;
     }
 
     private String gerarNumeroConta() {
@@ -35,132 +82,149 @@ public class ContaService {
         return numero;
     }
 
-    private ContaBancaria buscarContaPorNumeroInterno(String numero) {
-        for (ContaBancaria conta : contas) {
-            if (conta.getNumero().equals(numero)) {
-                return conta;
+    public Cliente buscarClientePorCpf(String cpf) {
+        String cpfPadronizado = padronizarCpf(cpf);
+
+        if (cpfPadronizado == null) {
+            return null;
+        }
+
+        for (Cliente cliente : clientes) {
+            if (cliente.getCpf().equals(cpfPadronizado)) {
+                return cliente;
             }
         }
         return null;
     }
 
-    public ContaBancaria criarConta(String titular) throws ValorInvalidoException {
-        if (titular == null || titular.isBlank()) {
-            throw new ValorInvalidoException("Nome do titular não pode ser vazio.");
+    public ContaBancaria buscarContaPorNumero(String numero) {
+        for (Cliente cliente : clientes) {
+            if (cliente.getConta().getNumero().equals(numero)) {
+                return cliente.getConta();
+            }
         }
-        ContaBancaria conta = new ContaBancaria(gerarNumeroUnico(), titular);
-        contas.add(conta);
-        return conta;
+        return null;
     }
 
-    public ContaBancaria buscarContaPorNumero(String numero) throws ContaNaoEncontradaException {
-        ContaBancaria conta = buscarContaPorNumeroInterno(numero);
+    public double consultarSaldo(ContaBancaria conta) {
         if (conta == null) {
-            throw new ContaNaoEncontradaException(numero);
+            return 0;
         }
-        return conta;
+        return conta.getSaldo();
     }
 
-    public BigDecimal consultarSaldo(String numeroConta) throws ContaNaoEncontradaException {
-        return buscarContaPorNumero(numeroConta).getSaldo();
+    public boolean depositar(ContaBancaria conta, double valor) {
+        if (conta == null || valor <= 0) {
+            return false;
+        }
+
+        conta.setSaldo(conta.getSaldo() + valor);
+        conta.adicionarTransacao(new Transacao(
+                "DEPÓSITO",
+                valor,
+                "Depósito realizado na conta " + conta.getNumero()
+        ));
+
+        return true;
     }
 
-    public void depositar(String numeroConta, BigDecimal valor)
-            throws ContaNaoEncontradaException, ValorInvalidoException {
-        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ValorInvalidoException("O valor do depósito deve ser positivo.");
+    public boolean sacar(ContaBancaria conta, double valor) {
+        if (conta == null || valor <= 0 || valor > conta.getSaldo()) {
+            return false;
         }
-        buscarContaPorNumero(numeroConta).depositar(valor);
+
+        conta.setSaldo(conta.getSaldo() - valor);
+        conta.adicionarTransacao(new Transacao(
+                "SAQUE",
+                valor,
+                "Saque realizado na conta " + conta.getNumero()
+        ));
+
+        return true;
     }
 
-    public void sacar(String numeroConta, BigDecimal valor)
-            throws ContaNaoEncontradaException, ValorInvalidoException, SaldoInsuficienteException {
-        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ValorInvalidoException("O valor do saque deve ser positivo.");
+    public boolean transferir(ContaBancaria origem, ContaBancaria destino, double valor) {
+        if (origem == null || destino == null || valor <= 0 || valor > origem.getSaldo()) {
+            return false;
         }
-        ContaBancaria conta = buscarContaPorNumero(numeroConta);
-        if (conta.getSaldo().compareTo(valor) < 0) {
-            throw new SaldoInsuficienteException(valor, conta.getSaldo());
-        }
-        conta.sacar(valor);
+
+        origem.setSaldo(origem.getSaldo() - valor);
+        destino.setSaldo(destino.getSaldo() + valor);
+
+        origem.adicionarTransacao(new Transacao(
+                "TRANSFERÊNCIA ENVIADA",
+                valor,
+                "Transferência enviada para a conta " + destino.getNumero()
+        ));
+
+        destino.adicionarTransacao(new Transacao(
+                "TRANSFERÊNCIA RECEBIDA",
+                valor,
+                "Transferência recebida da conta " + origem.getNumero()
+        ));
+
+        return true;
     }
 
-    public void transferir(String numeroOrigem, String numeroDestino, BigDecimal valor)
-            throws ContaNaoEncontradaException, ValorInvalidoException, SaldoInsuficienteException {
-        if (valor == null || valor.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new ValorInvalidoException("O valor da transferência deve ser positivo.");
-        }
-        ContaBancaria origem = buscarContaPorNumero(numeroOrigem);
-        ContaBancaria destino = buscarContaPorNumero(numeroDestino);
-        if (origem.getSaldo().compareTo(valor) < 0) {
-            throw new SaldoInsuficienteException(valor, origem.getSaldo());
-        }
-        origem.registrarTransferencia(valor, true, destino.getNumero());
-        destino.registrarTransferencia(valor, false, origem.getNumero());
-    }
-
-    public void exibirDados(String numeroConta) throws ContaNaoEncontradaException {
-        ContaBancaria conta = buscarContaPorNumero(numeroConta);
-        System.out.println("\n==============================");
-        System.out.println("       DADOS DA CONTA");
-        System.out.println("==============================");
-        System.out.println("Número : " + conta.getNumero());
-        System.out.println("Titular: " + conta.getTitular());
-        System.out.printf("Saldo  : R$ %.2f%n", conta.getSaldo());
-        System.out.println("==============================");
-    }
-
-    public void exibirExtrato(String numeroConta) throws ContaNaoEncontradaException {
-        ContaBancaria conta = buscarContaPorNumero(numeroConta);
-        System.out.println("\n==============================");
-        System.out.println("    EXTRATO DA CONTA " + numeroConta);
-        System.out.println("==============================");
-        List<Transacao> extrato = conta.getExtrato();
-        if (extrato.isEmpty()) {
-            System.out.println("Nenhuma transação registrada.");
-        } else {
-            for (Transacao t : extrato) {
-                System.out.println(t);
-            }
-        }
-        System.out.println("==============================");
-    }
-
-    public void exibirHistoricoTransferencias(String numeroConta) throws ContaNaoEncontradaException {
-        ContaBancaria conta = buscarContaPorNumero(numeroConta);
-        System.out.println("\n==============================");
-        System.out.println(" TRANSFERÊNCIAS DA CONTA " + numeroConta);
-        System.out.println("==============================");
-        List<Transacao> transferencias = conta.getExtrato().stream()
-                .filter(t -> t.getTipo().startsWith("TRANSFERÊNCIA"))
-                .toList();
-        if (transferencias.isEmpty()) {
-            System.out.println("Nenhuma transferência registrada.");
-        } else {
-            for (Transacao t : transferencias) {
-                System.out.println(t);
-            }
-        }
-        System.out.println("==============================");
-    }
-
-    public void listarContas() {
-        if (contas.isEmpty()) {
-            System.out.println("Nenhuma conta cadastrada.");
-            return;
-        }
-        System.out.println("\n==============================");
-        System.out.println("     CONTAS CADASTRADAS");
-        System.out.println("==============================");
-        for (ContaBancaria conta : contas) {
+    public void exibirDados(ContaBancaria conta) {
+        if (conta != null) {
+            System.out.println("\n==============================");
+            System.out.println("       DADOS DA CONTA");
+            System.out.println("==============================");
             System.out.println("Número : " + conta.getNumero());
             System.out.println("Titular: " + conta.getTitular());
             System.out.printf("Saldo  : R$ %.2f%n", conta.getSaldo());
+            System.out.println("==============================");
+        } else {
+            System.out.println("Conta não encontrada.");
+        }
+    }
+
+    public void listarClientes() {
+        if (clientes.isEmpty()) {
+            System.out.println("Nenhum cliente cadastrado.");
+            return;
+        }
+
+        System.out.println("\n==============================");
+        System.out.println("    CLIENTES CADASTRADOS");
+        System.out.println("==============================");
+
+        for (Cliente cliente : clientes) {
+            System.out.println("Nome       : " + cliente.getNome());
+            System.out.println("CPF        : " + cliente.getCpfFormatado());
+            System.out.println("Data Nasc. : " + cliente.getDataNascimentoFormatada());
+            System.out.println("Conta      : " + cliente.getConta().getNumero());
+            System.out.printf("Saldo      : R$ %.2f%n", cliente.getConta().getSaldo());
             System.out.println("------------------------------");
         }
     }
 
-    public List<ContaBancaria> getContas() {
-        return Collections.unmodifiableList(contas);
+    public void exibirHistorico(ContaBancaria conta) {
+        if (conta == null) {
+            System.out.println("Conta não encontrada.");
+            return;
+        }
+
+        System.out.println("\n==============================");
+        System.out.println("   HISTÓRICO DE TRANSAÇÕES");
+        System.out.println("==============================");
+        System.out.println("Conta  : " + conta.getNumero());
+        System.out.println("Titular: " + conta.getTitular());
+        System.out.println("------------------------------");
+
+        if (conta.getHistorico().isEmpty()) {
+            System.out.println("Nenhuma transação registrada.");
+        } else {
+            for (Transacao transacao : conta.getHistorico()) {
+                System.out.println(transacao);
+            }
+        }
+
+        System.out.println("==============================");
+    }
+
+    public List<Cliente> getClientes() {
+        return clientes;
     }
 }
