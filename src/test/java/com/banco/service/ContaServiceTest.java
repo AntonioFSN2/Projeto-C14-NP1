@@ -16,6 +16,12 @@ public class ContaServiceTest {
     @BeforeEach
     void setUp() {
         service = new ContaService();
+
+        Cliente c1 = service.cadastrarCliente("66666666666", "Daniele", "15/03/1995");
+        Cliente c2 = service.cadastrarCliente("77777777777", "Auxiliar", "10/05/1990");
+
+        contaDaniele = c1.getConta();
+        contaAuxiliar = c2.getConta();
     }
 
     @Test
@@ -71,14 +77,6 @@ public class ContaServiceTest {
         Cliente cliente = service.buscarClientePorCpf("99999999998");
 
         assertNull(cliente);
-    }
-}
-
-        Cliente c1 = service.cadastrarCliente("66666666666", "Daniele", "15/03/1995");
-        Cliente c2 = service.cadastrarCliente("77777777777", "Auxiliar", "10/05/1990");
-
-        contaDaniele = c1.getConta();
-        contaAuxiliar = c2.getConta();
     }
 
     // Caso 6 — Transferência válida atualiza os dois saldos
