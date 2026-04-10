@@ -4,6 +4,7 @@ import com.banco.model.Cliente;
 import com.banco.model.ContaBancaria;
 import com.banco.model.Transacao;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -74,6 +75,15 @@ public class ContaService {
         return String.format("%04d-%02d", parte1, parte2);
     }
 
+    private ContaBancaria buscarContaPorNumeroInterno(String numero) {
+        for (Cliente cliente : clientes) {
+            if (cliente.getConta().getNumero().equals(numero)) {
+                return cliente.getConta();
+            }
+        }
+        return null;
+    }
+
     private String gerarNumeroUnico() {
         String numero;
         do {
@@ -121,7 +131,7 @@ public class ContaService {
         conta.setSaldo(conta.getSaldo() + valor);
         conta.adicionarTransacao(new Transacao(
                 "DEPÓSITO",
-                valor,
+                BigDecimal.valueOf(valor),
                 "Depósito realizado na conta " + conta.getNumero()
         ));
 
@@ -136,7 +146,7 @@ public class ContaService {
         conta.setSaldo(conta.getSaldo() - valor);
         conta.adicionarTransacao(new Transacao(
                 "SAQUE",
-                valor,
+                BigDecimal.valueOf(valor),
                 "Saque realizado na conta " + conta.getNumero()
         ));
 
@@ -153,13 +163,13 @@ public class ContaService {
 
         origem.adicionarTransacao(new Transacao(
                 "TRANSFERÊNCIA ENVIADA",
-                valor,
+                BigDecimal.valueOf(valor),
                 "Transferência enviada para a conta " + destino.getNumero()
         ));
 
         destino.adicionarTransacao(new Transacao(
                 "TRANSFERÊNCIA RECEBIDA",
-                valor,
+                BigDecimal.valueOf(valor),
                 "Transferência recebida da conta " + origem.getNumero()
         ));
 
@@ -221,6 +231,31 @@ public class ContaService {
             }
         }
 
+        System.out.println("==============================");
+    }
+
+    public void exibirHistoricoTransferencias(String numeroConta) {
+        ContaBancaria conta = buscarContaPorNumero(numeroConta);
+        if (conta == null) {
+            System.out.println("Conta não encontrada.");
+            return;
+        }
+
+        System.out.println("\n==============================");
+        System.out.println(" TRANSFERÊNCIAS DA CONTA " + numeroConta);
+        System.out.println("==============================");
+
+        List<Transacao> transferencias = conta.getHistorico().stream()
+                .filter(t -> t.getTipo().startsWith("TRANSFERÊNCIA"))
+                .toList();
+
+        if (transferencias.isEmpty()) {
+            System.out.println("Nenhuma transferência registrada.");
+        } else {
+            for (Transacao t : transferencias) {
+                System.out.println(t);
+            }
+        }
         System.out.println("==============================");
     }
 

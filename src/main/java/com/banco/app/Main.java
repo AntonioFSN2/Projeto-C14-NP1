@@ -1,10 +1,12 @@
 package com.banco.app;
 
+import com.banco.exception.ContaNaoEncontradaException;
 import com.banco.model.Cliente;
 import com.banco.model.ContaBancaria;
 import com.banco.model.Transacao;
 import com.banco.service.ContaService;
 
+import java.math.BigDecimal;
 import java.util.Scanner;
 
 public class Main {
@@ -20,7 +22,7 @@ public class Main {
             cliente1.getConta().setSaldo(500);
             cliente1.getConta().adicionarTransacao(new Transacao(
                     "SALDO INICIAL",
-                    500,
+                    BigDecimal.valueOf(500),
                     "Saldo inicial definido para a conta"
             ));
         }
@@ -29,7 +31,7 @@ public class Main {
             cliente2.getConta().setSaldo(200);
             cliente2.getConta().adicionarTransacao(new Transacao(
                     "SALDO INICIAL",
-                    200,
+                    BigDecimal.valueOf(200),
                     "Saldo inicial definido para a conta"
             ));
         }
@@ -38,7 +40,7 @@ public class Main {
             cliente3.getConta().setSaldo(600);
             cliente3.getConta().adicionarTransacao(new Transacao(
                     "SALDO INICIAL",
-                    600,
+                    BigDecimal.valueOf(600),
                     "Saldo inicial definido para a conta"
             ));
         }
@@ -55,7 +57,8 @@ public class Main {
             System.out.println("6 - Exibir dados da conta");
             System.out.println("7 - Listar clientes");
             System.out.println("8 - Histórico de transações");
-            System.out.println("9 - Sair");
+            System.out.println("9 - Histórico de transferências");
+            System.out.println("10 - Sair");
             System.out.print("Escolha uma opção: ");
 
             int opcao;
@@ -221,12 +224,7 @@ public class Main {
                 case 9:
                     System.out.println("\n--- Histórico de Transferências ---");
                     System.out.print("Número da conta (ex: 1234-56): ");
-                    try {
-                        String num = scanner.nextLine();
-                        service.exibirHistoricoTransferencias(num);
-                    } catch (ContaNaoEncontradaException e) {
-                        System.out.println("Erro: " + e.getMessage());
-                    }
+                    service.exibirHistoricoTransferencias(scanner.nextLine());
                     break;
 
                 case 10:
