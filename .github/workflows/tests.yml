@@ -1,14 +1,15 @@
-name: CI - JUnit
+name: Tests
 
 on:
-  push:
-    branches: [main, 'feat/**']
-  pull_request:
-    branches: [main]
+  workflow_run:
+    workflows: [ "Build Pipeline" ]
+    branches: [ main, "feat/**", "fix/**" ]
+    types: [ completed ]
 
 jobs:
   junit-tests:
     runs-on: ubuntu-latest
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Baixar código

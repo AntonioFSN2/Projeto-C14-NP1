@@ -2,9 +2,11 @@ name: Version Bump
 
 on:
   workflow_run:
-    workflows: ["Test"]
+    workflows: [ "Tests" ]
     branches: [ main ]
     types: [ completed ]
+    # Só dispara quando o push é direto para main (não em PRs)
+    # O filtro de branch acima já garante isso
 
 permissions:
   contents: write
