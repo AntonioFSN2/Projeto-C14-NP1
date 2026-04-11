@@ -6,7 +6,7 @@
 
     <groupId>com.banco</groupId>
     <artifactId>sistema-bancario</artifactId>
-    <version>0.1.5</version>
+    <version>0.1.6</version>
 
     <properties>
         <maven.compiler.release>17</maven.compiler.release>
