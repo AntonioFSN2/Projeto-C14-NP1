@@ -2,6 +2,8 @@
 
 Projeto desenvolvido para a disciplina de Engenharia de Software com o objetivo de aplicar conceitos de orientação a objetos, testes unitários e integração contínua.
 
+**Repositório:** https://github.com/AntonioFSN2/Projeto-C14-NP1
+
 ---
 
 ## Descrição
@@ -16,7 +18,7 @@ Cada cliente possui uma conta bancária criada automaticamente no momento do cad
 
 - Java 17
 - Maven
-- JUnit 5
+- JUnit 5.10.2
 - GitHub Actions
 
 ---
@@ -35,7 +37,7 @@ src
 │   │   └── ContaService
 │   └── exception
 └── test/java/com/banco/service
-    └── ContaServiceCadastroClienteTest
+    └── ContaServiceTest
 ```
 
 ---
@@ -85,35 +87,27 @@ Cada operação realizada gera um registro contendo:
 
 ## Testes Unitários
 
-Os testes foram implementados com JUnit 5, focando na classe `ContaService`.
+Os testes foram implementados com JUnit 5 na classe `ContaServiceTest`, cobrindo 20 cenários divididos em dois grupos:
 
-### Cenários implementados — Cadastro de Cliente
-
-| Cenário | Descrição |
-|---|---|
-| Cadastro válido | Dados corretos, conta criada com sucesso |
-| CPF formatado | Normalização de CPF com e sem máscara |
-| CPF duplicado | Rejeita cadastro com CPF já existente |
-| Nome inválido | Rejeita nome vazio ou nulo |
-| CPF inválido | Rejeita CPF com formato incorreto |
-
-Os testes estão organizados por responsabilidade, garantindo melhor manutenção e legibilidade do código.
+- **Fluxo Normal (10 casos):** validam que o sistema executa corretamente as operações esperadas com entradas válidas — cadastro, busca, depósito, saque, transferência e histórico.
+- **Fluxo de Extensão (10 casos):** validam o comportamento do sistema diante de entradas inválidas, dados duplicados, saldos insuficientes e formatos incorretos.
 
 ---
 
 ## CI/CD — GitHub Actions
 
-O projeto possui pipelines configuradas no GitHub Actions para execução automática dos testes JUnit.
+O projeto possui uma pipeline configurada no GitHub Actions que é executada automaticamente a cada `push` ou `pull request` para a branch `main` ou branches `feat/**`.
 
-### Pipelines disponíveis
+### Etapas da pipeline
 
-| Arquivo | Função |
+| Etapa | Descrição |
 |---|---|
-| `.github/workflows/tests.yml` | Executa os testes com `mvn test` |
-| `.github/workflows/deploy.yml` | Realiza o deploy da aplicação |
-| `.github/workflows/version-bump.yml` | Gerencia o versionamento do projeto |
+| Checkout | Clona o repositório |
+| Setup Java 17 | Configura JDK Temurin 17 com cache Maven |
+| Compilar | Executa `mvn compile` |
+| Executar Testes | Executa `mvn test` e reporta os resultados |
 
-Os relatórios de teste são gerados em `target/surefire-reports` e disponibilizados como artifacts no GitHub Actions.
+O merge só deve ser realizado com o badge verde, ou seja, com todos os testes passando.
 
 ---
 
