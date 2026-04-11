@@ -413,7 +413,6 @@ atualize o arquivo de prompts
 Os prompts abaixo foram utilizados através da IA Claude e o 'Chat' atráves do VsCode, sendo aplicados diretamente no fluxo de desenvolvimento do projeto.
 
 ```text
-/init
 "Me auxilie na construção e implementação dos testes unitários referentes aos cenários 6 a 10, referente ao ContaService.java"
 
 "eu quero criar uma branch e commitar essas atualizações na minha branch"
