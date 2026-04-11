@@ -407,3 +407,17 @@ altere o deploy para publicar o jar no repo
 
 atualize o arquivo de prompts
 ```
+
+# Daniele Letícia
+
+Os prompts abaixo foram utilizados através da IA Claude e o 'Chat' atráves do VsCode, sendo aplicados diretamente no fluxo de desenvolvimento do projeto.
+
+"Me auxilie na construção e implementação dos testes unitários referentes aos cenários 6 a 10, referente ao ContaService.java"
+
+"eu quero criar uma branch e commitar essas atualizações na minha branch"
+
+"test fica em qual parte do repositório neste projeto"
+
+"crie a pasta, e crie um file ContaServiceTest.java, mas vazia sem linhas de código"
+
+"adicionei os testes unitários e gostaria de verificar se está correto"
