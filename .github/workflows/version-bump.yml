@@ -55,5 +55,6 @@ jobs:
           git add pom.xml
           git commit -m "chore: bump version to ${{ steps.version.outputs.new }} [skip ci]"
           git tag "v${{ steps.version.outputs.new }}"
+          git pull --rebase origin main
           git push origin main
           git push origin "v${{ steps.version.outputs.new }}"
